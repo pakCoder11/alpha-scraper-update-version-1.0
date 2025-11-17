@@ -1,0 +1,13 @@
+claude-3-opus-20240229  - Claude 3 Opus (most powerful Claude 3 model) 
+claude-3-sonnet-20240229 - Claude 3 Sonnet (balanced) 
+claude-3-haiku-20240307 - Claude 3 Haiku (fastest, cheapest)
+
+--------------------------------------------------------------
+
+"claude-haiku-3-20250220"           # Cheapest
+"claude-haiku-3-5-20241122"         
+"claude-haiku-4-5-20250514"         
+"claude-sonnet-4-5-20250929"        # Best for coding
+"claude-sonnet-4-20250514"          
+"claude-3-7-sonnet-20250219"        
+"claude-opus-4-1-20250514"          # Most expensive

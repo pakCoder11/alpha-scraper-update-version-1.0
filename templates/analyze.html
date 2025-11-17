@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>View & Analyze Data</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/static/styles.css" rel="stylesheet">
+  <style>
+    /* JSON content styling */
+    .json-content {
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 70vh;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
+    /* Highlight JSON keys */
+    .json-key { color: #0066cc; font-weight: bold; }
+    .json-string { color: #008800; }
+    .json-number { color: #aa22ff; }
+    .json-boolean { color: #aa22ff; font-weight: bold; }
+    .json-null { color: #aa22ff; font-weight: bold; }
+    
+    /* Typewriter cursor animation */
+    .cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1em;
+      background-color: #333;
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    
+    @keyframes blink {
+      from, to { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    
+    /* Enhanced typewriter text styling */
+    #ai-typewriter {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #0d6efd;
+      text-shadow: 0 0 1px rgba(13, 110, 253, 0.2);
+    }
+    
+    #ai-typewriter strong {
+      font-weight: 700;
+      color: #0a58ca;
+    }
+    
+    /* AI Report styling */
+    .ai-report-container {
+      background: linear-gradient(145deg, #f8f9fa, #ffffff);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .ai-report-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #212529;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #0d6efd;
+      padding-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .ai-report-title i {
+      margin-right: 0.5rem;
+      color: #0d6efd;
+    }
+    
+    .ai-report-content {
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+    
+    .ai-report-content h1, .ai-report-content h2, .ai-report-content h3 {
+      color: #0d6efd;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .ai-report-content ul, .ai-report-content ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .ai-report-content strong {
+      color: #0a58ca;
+    }
+    .viz-modal .modal-content { border-radius: 12px; box-shadow: 0 10px 24px rgba(0,0,0,.12); overflow: hidden; }
+    .viz-modal .modal-header { background: linear-gradient(135deg, #0d6efd, #6610f2); color: #fff; border-bottom: none; }
+    .viz-modal .modal-title { font-weight: 700; }
+    .viz-modal .modal-header .btn-close { background-color: rgba(255,255,255,.35); border-radius: 50%; padding: .6rem; opacity: 1; }
+    .viz-modal .modal-header .btn-close:hover { background-color: rgba(255,255,255,.55); }
+    [data-bs-theme="dark"] .viz-modal .modal-header .btn-close { background-color: rgba(255,255,255,.25); }
+    .viz-graph-row { transition: transform .2s ease, box-shadow .2s ease; border-radius: 10px; }
+    .viz-graph-row:focus { outline: none; box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25); transform: translateY(-1px); }
+    .viz-graph-img { opacity: 0; transition: opacity .3s ease-in; max-width: 100%; height: auto; object-fit: contain; }
+    .viz-graph-img.loaded { opacity: 1; }
+    .viz-loading { min-height: 80px; }
+    .viz-header-main { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; font-weight: 800; font-size: 32px; color: #212529; letter-spacing: .2px; }
+    .viz-header-sub { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; font-weight: 600; font-size: 24px; color: #6c757d; }
+    .viz-header-desc { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; font-weight: 400; font-size: 18px; line-height: 1.6; color: #495057; }
+    .viz-header-wrap { padding: .5rem 0 1rem 0; }
+    .animate-fadeup { animation: fadeup .35s ease-out both; }
+    @keyframes fadeup { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="/">Alpha Scraper</a>
+    <div class="ms-auto">
+      <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button" title="Toggle theme" aria-label="Toggle theme">
+        <i id="themeIcon" class="bi bi-moon-stars"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <h2 class="mb-3">View & Analyze Data</h2>
+  <p class="text-muted">All detected .xlsx and .json files are listed below. Preview data or run AI analysis.</p>
+
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>Available Files</span>
+      <div class="d-flex gap-2">
+        <button id="refresh-files" class="btn btn-sm btn-outline-secondary">Refresh</button>
+        <button id="delete-all-files" class="btn btn-sm btn-danger">
+          <i class="bi bi-trash3"></i> Delete All
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-warning small" role="alert">
+        Note: Data files are cleared automatically when the app starts. Please download your JSON/Excel files if you want to keep them.
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped align-middle" id="files-table">
+          <thead>
+            <tr>
+              <th>#ID</th>
+              <th>Purpose of Data</th>
+              <th>File Name</th>
+              <th>Created Time</th>
+              <th>View as Table</th>
+              <th>View as JSON</th>
+              <th>Download</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>Data Visualization</span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle" id="viz-table">
+          <thead>
+            <tr>
+              <th>File Name</th>
+              <th>Date</th>
+              <th>Run AI analysis</th>
+              <th>Graph Display</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="4" class="text-muted">No files to display.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  
+</div>
+
+<!-- Modals -->
+<div class="modal fade" id="tableModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Excel Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-bordered" id="modalTable">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Graphs Modal -->
+<div class="modal fade viz-modal" id="vizGraphsModal" tabindex="-1" aria-hidden="true" aria-labelledby="vizGraphsTitle">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header d-flex align-items-center">
+        <h5 class="modal-title" id="vizGraphsTitle">Graphs</h5>
+        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="vizHeader" class="viz-header-wrap"></div>
+        <div id="vizGraphsLoading" class="viz-loading d-flex align-items-center justify-content-center">
+          <div class="spinner-border text-light" role="status" aria-label="Loading graphs"></div>
+        </div>
+        <div id="vizGraphsList" class="vstack gap-3" aria-live="polite"></div>
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <div class="text-muted small">Use Arrow Up/Down keys to navigate</div>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="jsonModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">JSON Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <pre id="jsonPre" class="bg-light p-3 border rounded" style="white-space: pre-wrap;"></pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function fetchFiles() {
+  const res = await fetch('/api/list-files');
+  const data = await res.json();
+  const tbody = document.querySelector('#files-table tbody');
+  tbody.innerHTML = '';
+
+  // Clear any previous alerts
+  const alertEl = document.getElementById('files-alert');
+  if (alertEl) alertEl.remove();
+
+  let hasEligible = false;
+  (data.files || []).forEach(f => {
+    if (f.file.startsWith('instagram_posts_comments')) hasEligible = true;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${f.id}</td>
+      <td>${f.purpose}</td>
+      <td>${f.file}</td>
+      <td>${f.created || ''}</td>
+      <td><button class="btn btn-sm btn-outline-primary" data-file="${f.file}" data-action="table" ${f.file.toLowerCase().endsWith('.xlsx') ? '' : 'disabled'}>View as Table</button></td>
+      <td><button class="btn btn-sm btn-outline-secondary" data-file="${f.file}" data-action="json" ${f.is_json ? '' : 'disabled'}>View as JSON</button></td>
+      <td><a class="btn btn-sm btn-success" href="/download?file=${encodeURIComponent(f.file)}" download>Download</a></td>
+      <td>
+        <button class="btn btn-sm btn-danger d-flex align-items-center gap-1" data-file="${f.file}" data-action="delete" aria-label="Delete file ${f.file}" title="Delete file" tabindex="0">
+          <i class="bi bi-trash3" aria-hidden="true"></i>
+          <span>Delete</span>
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+}
+
+function formatDateOnly(s){
+  if(!s) return '';
+  const d=new Date(s); if(isNaN(d.getTime())) return s;
+  const p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+
+async function renderVizTable(){
+  try {
+    const res = await fetch('/api/list-files');
+    const data = await res.json();
+    const files = (data.files||[]);
+    const allowed = ['Instagram_user_reels_data.xlsx'];
+    const tbody = document.querySelector('#viz-table tbody');
+    tbody.innerHTML = '';
+    const target = files.filter(f => f.file.toLowerCase() === 'instagram_user_reels_data.xlsx');
+    if (target.length === 0){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td colspan="4" class="text-muted">No files to display.</td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+    target.forEach(f => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class='fw-semibold' aria-label='File name'>${f.file}</span></td>
+        <td>${formatDateOnly(f.created||'')}</td>
+        <td>
+          <button class='btn btn-sm btn-outline-secondary d-flex align-items-center gap-1' disabled aria-disabled='true' title='AI Analysis disabled' aria-label='AI disabled'>
+            <i class='bi bi-lock' aria-hidden='true'></i>
+            <span>Locked</span>
+          </button>
+        </td>
+        <td>
+          <button class='btn btn-primary btn-sm d-flex align-items-center gap-1' data-file='${f.file}' data-action='graphs' title='Display Graphs' aria-label='Display Graphs'>
+            <i class='bi bi-graph-up' aria-hidden='true'></i>
+            <span>Display Graphs</span>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    const tbody = document.querySelector('#viz-table tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="4" class="text-danger">Failed to load files: ${e.message||e}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function showGraphsModal(file){
+  const list = document.getElementById('vizGraphsList');
+  const loading = document.getElementById('vizGraphsLoading');
+  const title = document.getElementById('vizGraphsTitle');
+  title.textContent = `Graphs for ${file}`;
+  const header = document.getElementById('vizHeader');
+  list.innerHTML = '';
+  loading.classList.remove('d-none');
+  const modalEl = document.getElementById('vizGraphsModal');
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+  modal.show();
+  function escapeHTML(str){ return String(str).replace(/[&<>"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[s])); }
+  let username = 'selected user';
+  const m = file.match(/^Instagram_user_reels_data_(.+?)\.xlsx$/i);
+  if (m && m[1]) username = m[1].replace(/_/g,' ');
+  const main = 'Reels Performance Analytics';
+  header.innerHTML = `
+    <div class="viz-header-main animate-fadeup">${main}</div>
+  `;
+  fetch('/api/list-graphs').then(r=>r.json()).then(j=>{
+    const graphs = (j.graphs||[]);
+    loading.classList.add('d-none');
+    if (graphs.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'text-muted';
+      empty.textContent = 'No graphs available';
+      list.appendChild(empty);
+      return;
+    }
+    graphs.forEach((name,i)=>{
+      const row = document.createElement('div');
+      row.className = 'viz-graph-row p-2 border';
+      row.setAttribute('tabindex','0');
+      row.setAttribute('aria-label', `Graph ${i+1}: ${name}`);
+      row.innerHTML = `
+        <div class='d-flex align-items-center justify-content-between mb-2'>
+          <span class='small text-muted'>${name}</span>
+          <a class='btn btn-sm btn-outline-secondary' href='/graphs/${name}' target='_blank' aria-label='Open image in new tab'><i class='bi bi-box-arrow-up-right'></i></a>
+        </div>
+        <div class='text-center'>
+          <img src='/graphs/${name}' alt='Graph image: ${name}' class='viz-graph-img' loading='lazy' />
+        </div>
+      `;
+      list.appendChild(row);
+      const img = row.querySelector('img');
+      img.addEventListener('load', ()=> img.classList.add('loaded'));
+    });
+  }).catch(err=>{
+    loading.classList.add('d-none');
+    const error = document.createElement('div');
+    error.className = 'text-danger';
+    error.textContent = 'Failed to load graphs: ' + (err.message||err);
+    list.appendChild(error);
+  });
+
+  modalEl.addEventListener('keydown', (e)=>{
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+      const items = Array.from(list.querySelectorAll('.viz-graph-row'));
+      const active = document.activeElement;
+      let idx = items.indexOf(active);
+      if (e.key === 'ArrowDown') idx = Math.min(items.length-1, idx+1);
+      if (e.key === 'ArrowUp') idx = Math.max(0, idx-1);
+      items[idx]?.focus();
+    }
+  }, { once: false });
+}
+
+async function openTable(file) {
+  try {
+    const res = await fetch(`/api/file-table?file=${encodeURIComponent(file)}`);
+    const thead = document.querySelector('#modalTable thead');
+    const tbody = document.querySelector('#modalTable tbody');
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    if (!res.ok) {
+      thead.innerHTML = `<tr><th>Error</th></tr>`;
+      tbody.innerHTML = `<tr><td class="text-danger">${res.status} ${res.statusText}</td></tr>`;
+    } else {
+      const data = await res.json();
+      if (data.ok === false || data.error) {
+        const msg = data.message || data.error || 'Failed to load table data.';
+        thead.innerHTML = `<tr><th>Error</th></tr>`;
+        tbody.innerHTML = `<tr><td class="text-danger">${msg}</td></tr>`;
+      } else if (!Array.isArray(data.columns) || !Array.isArray(data.rows)) {
+        thead.innerHTML = `<tr><th>Info</th></tr>`;
+        tbody.innerHTML = `<tr><td>No data available in this file.</td></tr>`;
+      } else {
+        const headerRow = document.createElement('tr');
+        data.columns.forEach(c => {
+          const th = document.createElement('th');
+          th.textContent = c;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+
+        if (data.rows.length === 0) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td class="text-muted" colspan="${data.columns.length}">No rows to display.</td>`;
+          tbody.appendChild(tr);
+        } else {
+          data.rows.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = data.columns.map(c => `<td>${(r[c] ?? '')}</td>`).join('');
+            tbody.appendChild(tr);
+          });
+        }
+      }
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('tableModal'));
+    modal.show();
+  } catch (err) {
+    const thead = document.querySelector('#modalTable thead');
+    const tbody = document.querySelector('#modalTable tbody');
+    thead.innerHTML = `<tr><th>Error</th></tr>`;
+    tbody.innerHTML = `<tr><td class="text-danger">${err.message || err}</td></tr>`;
+    const modal = new bootstrap.Modal(document.getElementById('tableModal'));
+    modal.show();
+  }
+}
+
+async function openJSON(file) {
+  try {
+    const res = await fetch(`/api/file-json?file=${encodeURIComponent(file)}`);
+    const pre = document.getElementById('jsonPre');
+
+    if (!res.ok) {
+      pre.textContent = `Error: ${res.status} ${res.statusText}`;
+    } else {
+      const data = await res.json();
+      if (data.ok === false || data.error) {
+        pre.textContent = 'Error: ' + (data.message || data.error || 'Failed to load JSON');
+      } else if (data.data === undefined) {
+        pre.textContent = 'Error: No data returned from server';
+      } else {
+        pre.textContent = JSON.stringify(data.data, null, 2);
+      }
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('jsonModal'));
+    modal.show();
+  } catch (error) {
+    const pre = document.getElementById('jsonPre');
+    pre.textContent = 'Error: ' + (error.message || error);
+    const modal = new bootstrap.Modal(document.getElementById('jsonModal'));
+    modal.show();
+  }
+}
+
+// Function to apply syntax highlighting to JSON
+function syntaxHighlightJSON(pre) {
+  const jsonStr = pre.textContent;
+  // Safety check
+  if (!jsonStr) return;
+  
+  // Replace JSON syntax with highlighted spans
+  let highlighted = jsonStr
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?/g, match => {
+      const className = match.endsWith(':') ? 'json-key' : 'json-string';
+      return `<span class="${className}">${match}</span>`;
+    })
+    .replace(/\b(true|false)\b/g, '<span class="json-boolean">$1</span>')
+    .replace(/\b(null)\b/g, '<span class="json-null">$1</span>')
+    .replace(/\b(-?\d+(\.\d*)?)([,\s\]\}])/g, '<span class="json-number">$1</span>$3');
+  
+  pre.innerHTML = highlighted;
+}
+
+function typeWriter(text, el, speed = 30, onComplete) {
+  el.textContent = '';
+  let i = 0;
+  
+  function tick() {
+    if (i < text.length) {
+      el.textContent = text.slice(0, i + 1);
+      i++;
+      
+      // Variable speed for more natural typing effect
+      const nextSpeed = speed + Math.random() * 50 - 25; // Random variation between -25ms and +25ms
+      setTimeout(tick, nextSpeed);
+    } else {
+      if (typeof onComplete === 'function') onComplete();
+    }
+  }
+  
+  setTimeout(tick, speed);
+}
+
+// Enhanced typewriter function that supports HTML formatting
+function typeWriterHTML(html, el, speed = 30, onComplete) {
+  // Create a temporary div to parse the HTML
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  const textContent = tempDiv.textContent;
+  
+  // Clear the element
+  el.innerHTML = '';
+  
+  let charIndex = 0;
+  let htmlIndex = 0;
+  
+  function tick() {
+    if (charIndex < textContent.length) {
+      // Find the next character in the HTML
+      while (htmlIndex < html.length) {
+        const char = html[htmlIndex++];
+        
+        // If we're inside a tag, add the whole tag at once
+        if (char === '<') {
+          const tagEnd = html.indexOf('>', htmlIndex);
+          if (tagEnd !== -1) {
+            const tag = html.substring(htmlIndex - 1, tagEnd + 1);
+            el.innerHTML += tag;
+            htmlIndex = tagEnd + 1;
+          }
+        } else if (char === '&') {
+          // Handle HTML entities (like &amp;, &lt;, etc.)
+          const entityEnd = html.indexOf(';', htmlIndex);
+          if (entityEnd !== -1 && entityEnd - htmlIndex < 10) { // Reasonable entity length
+            const entity = html.substring(htmlIndex - 1, entityEnd + 1);
+            el.innerHTML += entity;
+            htmlIndex = entityEnd + 1;
+            charIndex++;
+            break;
+          } else {
+            el.innerHTML += char;
+            charIndex++;
+            break;
+          }
+        } else {
+          // Regular character
+          el.innerHTML += char;
+          charIndex++;
+          break;
+        }
+      }
+      
+      // Variable speed for more natural typing effect
+      const nextSpeed = speed + Math.random() * 50 - 25; // Random variation
+      setTimeout(tick, nextSpeed);
+    } else {
+      if (typeof onComplete === 'function') onComplete();
+    }
+  }
+  
+  setTimeout(tick, speed);
+}
+
+async function runAIDummy() {
+  // check env on backend and run analysis
+  const btn = document.getElementById('btn-run-ai');
+  const spinner = btn.querySelector('.spinner-border');
+  const reportWrap = document.getElementById('ai-report');
+  const reportOutput = document.getElementById('report-output');
+  
+  // Prevent double clicks and show spinner until typing completes
+  btn.disabled = true;
+  spinner.classList.remove('d-none');
+  
+  // Show placeholder while waiting
+  reportWrap.classList.remove('d-none');
+  reportOutput.innerHTML = '<strong>Generating report… Please wait.</strong>';
+  
+  try {
+    const res = await fetch('/api/run-ai-dummy', { method: 'POST' });
+    const data = await res.json();
+    if (!data.ok) {
+      alert(data.message || 'Failed to run AI analysis');
+      return;
+    }
+    
+    // If server returned the report immediately
+    if (data.report_md) {
+      const htmlContent = convertMarkdownToHTML(data.report_md);
+      typeWriterHTML(htmlContent, reportOutput, 15, () => {
+        spinner.classList.add('d-none');
+        btn.disabled = false;
+      });
+      return;
+    }
+    
+    // Otherwise, poll for the report file until ready
+    const maxWaitMs = 120000; // 2 minutes
+    const intervalMs = 1500;
+    const start = Date.now();
+    
+    async function poll() {
+      const res2 = await fetch('/api/analysis-report');
+      const d2 = await res2.json();
+      if (d2.exists && d2.content) {
+        const htmlContent = convertMarkdownToHTML(d2.content);
+        typeWriterHTML(htmlContent, reportOutput, 15, () => {
+          spinner.classList.add('d-none');
+          btn.disabled = false;
+        });
+        return;
+      }
+      if (Date.now() - start > maxWaitMs) {
+        reportOutput.innerHTML = '<span class="text-danger">Timed out waiting for the analysis to complete. Please try again.</span>';
+        spinner.classList.add('d-none');
+        btn.disabled = false;
+        return;
+      }
+      // animate placeholder with dots
+      const dots = '.'.repeat(((Math.floor((Date.now() - start) / 1000)) % 3) + 1);
+      reportOutput.innerHTML = `<strong>Generating report${dots} Please wait.</strong>`;
+      setTimeout(poll, intervalMs);
+    }
+    
+    poll();
+  } catch (e) {
+    console.error('Error:', e);
+    alert('Error: ' + e.message);
+    spinner.classList.add('d-none');
+    btn.disabled = false;
+  }
+}
+
+// Function to convert markdown to HTML
+function convertMarkdownToHTML(markdown) {
+  if (!markdown) return '';
+  
+  // Process headers
+  let html = markdown
+    // Headers
+    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    
+    // Bold
+    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+    
+    // Italic
+    .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+    
+    // Lists
+    .replace(/^\* (.*$)/gim, '<ul><li>$1</li></ul>')
+    .replace(/^\d+\. (.*$)/gim, '<ol><li>$1</li></ol>')
+    
+    // Links
+    .replace(/\[([^\]]+)\]\(([^\)]+)\)/gim, '<a href="$2" target="_blank">$1</a>')
+    
+    // Code blocks
+    .replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
+    
+    // Inline code
+    .replace(/`([^`]+)`/gim, '<code>$1</code>')
+    
+    // Paragraphs
+    .replace(/\n\s*\n/gim, '<br><br>');
+  
+  // Fix nested lists
+  html = html
+    .replace(/<\/ul>\s*<ul>/gim, '')
+    .replace(/<\/ol>\s*<ol>/gim, '');
+  
+  return html;
+}
+
+// Events
+
+document.getElementById('refresh-files').addEventListener('click', fetchFiles);
+document.getElementById('delete-all-files').addEventListener('click', deleteAllFiles);
+
+document.querySelector('#files-table tbody').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const file = btn.dataset.file;
+  const action = btn.dataset.action;
+  if (action === 'table') openTable(file);
+  if (action === 'json') openJSON(file);
+  if (action === 'delete') deleteFile(btn, file);
+});
+
+// Viz table actions
+document.querySelector('#viz-table tbody').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const file = btn.dataset.file;
+  const action = btn.dataset.action;
+  if (action === 'graphs') showGraphsModal(file);
+});
+
+// Keyboard accessibility: handle Enter/Space on delete buttons
+document.querySelector('#files-table tbody').addEventListener('keydown', (e) => {
+  const btn = e.target.closest('button[data-action="delete"]');
+  if (!btn) return;
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    deleteFile(btn, btn.dataset.file);
+  }
+});
+
+function showFilesAlert(type, message){
+  // type: 'success' | 'danger' | 'warning' | 'info'
+  const cardBody = document.querySelector('.card-body');
+  if (!cardBody) return;
+  const existing = document.getElementById('files-alert');
+  if (existing) existing.remove();
+  const div = document.createElement('div');
+  div.id = 'files-alert';
+  div.className = `alert alert-${type} alert-dismissible fade show`;
+  div.setAttribute('role', 'alert');
+  div.setAttribute('aria-live', 'polite');
+  div.innerHTML = `
+    <span>${message}</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  `;
+  cardBody.prepend(div);
+  // Auto-dismiss after 5 seconds
+  setTimeout(()=>{
+    try { const alert = bootstrap.Alert.getOrCreateInstance(div); alert.close(); } catch {}
+  }, 5000);
+}
+
+async function deleteFile(btn, file){
+  if (!file) return;
+  const spinner = btn.querySelector('.spinner-border');
+  // Confirmation dialog
+  const ok = confirm(`Are you sure you want to delete "${file}"? This action cannot be undone.`);
+  if (!ok) return;
+  // Visual feedback
+  btn.disabled = true;
+  if (spinner) spinner.classList.remove('d-none');
+  try {
+    const res = await fetch('/api/delete-file', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ file })
+    });
+    const data = await res.json().catch(()=>({ok:false,message:'Invalid server response'}));
+    if (!res.ok || data.ok === false) {
+      const msg = data.message || `${res.status} ${res.statusText}`;
+      showFilesAlert('danger', `Failed to delete ${file}: ${msg}`);
+      return;
+    }
+    // Remove row immediately for snappy UX
+    const tr = btn.closest('tr');
+    if (tr) tr.remove();
+    showFilesAlert('success', `Deleted ${file} successfully.`);
+    // Refresh remaining table data to maintain consistency
+    await fetchFiles();
+  } catch (err) {
+    console.error('Delete error:', err);
+    showFilesAlert('danger', `Error deleting ${file}: ${err.message || err}`);
+  } finally {
+    if (spinner) spinner.classList.add('d-none');
+    btn.disabled = false;
+  }
+}
+
+
+// init
+fetchFiles();
+renderVizTable();
+
+async function deleteAllFiles(){
+  const btn = document.getElementById('delete-all-files');
+  if (!btn) return;
+  const ok = confirm('Are you sure you want to delete all files? This action cannot be undone.');
+  if (!ok) return;
+  const spinner = btn.querySelector('.spinner-border');
+  btn.disabled = true;
+  if (spinner) spinner.classList.remove('d-none');
+  try {
+    const res = await fetch('/api/delete-all-files', { method: 'POST' });
+    const data = await res.json().catch(()=>({ok:false,message:'Invalid server response'}));
+    if (!res.ok || data.ok === false) {
+      const msg = data.message || `${res.status} ${res.statusText}`;
+      showFilesAlert('danger', msg);
+      return;
+    }
+    showFilesAlert('success', data.message || 'Deleted all files.');
+    await fetchFiles();
+  } catch (e) {
+    showFilesAlert('danger', `Error: ${e.message || e}`);
+  } finally {
+    if (spinner) spinner.classList.add('d-none');
+    btn.disabled = false;
+  }
+}
+</script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Enhance modal table after content is inserted
+const tableModalEl = document.getElementById('tableModal');
+tableModalEl.addEventListener('shown.bs.modal', () => {
+  const tbl = document.getElementById('modalTable');
+  if ($.fn.dataTable.isDataTable(tbl)) {
+    $(tbl).DataTable().destroy();
+  }
+  $(tbl).DataTable({ paging: true, pageLength: 10, lengthChange: false, ordering: true, searching: true });
+});
+</script>
+<footer class="bg-dark text-white text-center py-2 mt-4">
+  <small>Instagram Data Scraper v1.0 - 2025</small>
+</footer>
+<script>
+  // Theme toggle with persistence
+  (function(){
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initial = stored || (prefersDark ? 'dark' : 'light');
+    applyTheme(initial);
+
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.addEventListener('click', ()=>{
+      const next = (document.documentElement.getAttribute('data-bs-theme') === 'dark') ? 'light' : 'dark';
+      applyTheme(next);
+      localStorage.setItem('theme', next);
+    });
+
+    function applyTheme(t){
+      document.documentElement.setAttribute('data-bs-theme', t);
+      const icon = document.getElementById('themeIcon');
+      if (icon) icon.className = (t === 'dark') ? 'bi bi-sun-fill' : 'bi bi-moon-stars';
+    }
+  })();
+</script>
+</body>
+</html>

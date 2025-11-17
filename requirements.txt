@@ -1,0 +1,10 @@
+pillow 
+pandas
+opencv-python 
+requests
+pyautogui 
+bs4 
+selenium-driverless 
+flask 
+dotenv
+asyncio 

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Screenshot Guide – Alpha Scraper</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/static/styles.css" rel="stylesheet">
+</head>
+<body>
+<div class="bg-video-wrapper">
+  <video class="bg-video" autoplay muted loop playsinline>
+    <source src="/static/bg.mp4" type="video/mp4">
+  </video>
+  <div class="bg-overlay"></div>
+</div>
+<nav class="navbar navbar-light bg-white border-bottom"><div class="container-fluid"><a class="navbar-brand" href="/">⬅ Back</a>
+  <div class="ms-auto">
+    <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button" title="Toggle theme" aria-label="Toggle theme">
+      <i id="themeIcon" class="bi bi-moon-stars"></i>
+    </button>
+  </div>
+</div></nav>
+<main class="container py-4">
+  <h4 class="mb-3">Screenshot Guide</h4>
+  <div class="card p-3 mb-3">
+    <h6>Windows</h6>
+    <p>Use Snipping Tool: Press Windows + Shift + S, select the area and save. You can also open "Snipping Tool" from Start and choose the desired mode.</p>
+    <div class="ratio ratio-16x9 position-relative">
+      <iframe id="ytFrame" width="560" height="315" src="https://www.youtube.com/embed/yYhvjd3dWXI" title="Snipping Tool Tutorial" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <div id="ytOverlay" class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-25">
+        <button id="ytPlay" class="btn btn-danger btn-lg d-flex align-items-center gap-2"><i class="bi bi-play-fill"></i><span>Play</span></button>
+      </div>
+    </div>
+    <div class="d-flex gap-2 mt-2">
+      <a id="ytOpen" class="btn btn-outline-primary btn-sm" href="https://www.youtube.com/watch?v=yYhvjd3dWXI" target="_blank" rel="noopener">Open on YouTube</a>
+      <button id="ytReload" class="btn btn-outline-secondary btn-sm" type="button">Reload Video</button>
+      <button id="ytUnload" class="btn btn-outline-dark btn-sm" type="button">Unload Video</button>
+    </div>
+    <div id="ytError" class="alert alert-warning mt-2 d-none" role="alert">Unable to load the video. It may be unavailable or blocked. Try opening on YouTube.</div>
+  </div>
+
+  <div class="card p-3 mb-3">
+    <h6>How to Configure Instagram Reels Scraping</h6>
+    <div class="ratio ratio-16x9 position-relative">
+      <iframe id="reelsFrame" width="640" height="360" src="https://www.youtube.com/embed/yYhvjd3dWXI?controls=1" title="Instagram Reels Scraping Configuration" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <div id="reelsOverlay" class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-25">
+        <button id="reelsPlay" class="btn btn-danger btn-lg d-flex align-items-center gap-2"><i class="bi bi-play-fill"></i><span>Play</span></button>
+      </div>
+    </div>
+    <div class="d-flex gap-2 mt-2">
+      <a id="reelsOpen" class="btn btn-outline-primary btn-sm" href="https://www.youtube.com/watch?v=yYhvjd3dWXI" target="_blank" rel="noopener">Open on YouTube</a>
+      <button id="reelsReload" class="btn btn-outline-secondary btn-sm" type="button">Reload Video</button>
+      <button id="reelsUnload" class="btn btn-outline-dark btn-sm" type="button">Unload Video</button>
+    </div>
+    <div id="reelsError" class="alert alert-warning mt-2 d-none" role="alert">Unable to load the video. It may be unavailable or blocked. Try opening on YouTube.</div>
+
+    <div class="mt-3">
+      <p class="mb-2">This tutorial demonstrates screenshot configuration required for Instagram Reels scraping.</p>
+      <ul class="mb-2">
+        <li>Setting up correct screenshot regions and timing.</li>
+        <li>Ensuring UI elements are visible before capture.</li>
+        <li>Saving and verifying screenshots for automation.</li>
+      </ul>
+      <p class="mb-0"><strong>Prerequisites:</strong> Chrome installed, valid Instagram credentials, and stable network connection.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-secondary">
+    <strong>Mac/Linux:</strong> Coming soon.
+  </div>
+</main>
+<footer class="bg-dark text-white text-center py-2 mt-4" style="position: relative; z-index: 2;">
+  <small>Instagram Data Scraper v1.0 - 2025</small>
+</footer>
+<script>
+  // Theme toggle with persistence
+  (function(){
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initial = stored || (prefersDark ? 'dark' : 'light');
+    applyTheme(initial);
+
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.addEventListener('click', ()=>{
+      const next = (document.documentElement.getAttribute('data-bs-theme') === 'dark') ? 'light' : 'dark';
+      applyTheme(next);
+      localStorage.setItem('theme', next);
+    });
+
+    function applyTheme(t){
+      document.documentElement.setAttribute('data-bs-theme', t);
+      const icon = document.getElementById('themeIcon');
+      if (icon) icon.className = (t === 'dark') ? 'bi bi-sun-fill' : 'bi bi-moon-stars';
+    }
+  })();
+  (function(){
+    const frame = document.getElementById('ytFrame');
+    const overlay = document.getElementById('ytOverlay');
+    const playBtn = document.getElementById('ytPlay');
+    const reloadBtn = document.getElementById('ytReload');
+    const unloadBtn = document.getElementById('ytUnload');
+    const errorEl = document.getElementById('ytError');
+    let loaded = false;
+    if (frame) {
+      frame.addEventListener('load', function(){
+        loaded = true;
+        if (overlay) overlay.classList.add('d-none');
+      });
+    }
+    if (playBtn) playBtn.addEventListener('click', function(){
+      if (!frame) return;
+      frame.src = 'https://www.youtube.com/embed/yYhvjd3dWXI?autoplay=1';
+    });
+    if (reloadBtn) reloadBtn.addEventListener('click', function(){
+      if (!frame) return;
+      frame.src = 'https://www.youtube.com/embed/yYhvjd3dWXI';
+      if (overlay) overlay.classList.remove('d-none');
+    });
+    if (unloadBtn) unloadBtn.addEventListener('click', function(){
+      if (!frame) return;
+      frame.src = 'about:blank';
+      if (overlay) overlay.classList.remove('d-none');
+    });
+    setTimeout(function(){
+      if (!loaded && errorEl) errorEl.classList.remove('d-none');
+    }, 6000);
+  })();
+  (function(){
+    const frame = document.getElementById('reelsFrame');
+    const overlay = document.getElementById('reelsOverlay');
+    const playBtn = document.getElementById('reelsPlay');
+    const reloadBtn = document.getElementById('reelsReload');
+    const unloadBtn = document.getElementById('reelsUnload');
+    const errorEl = document.getElementById('reelsError');
+    let loaded = false;
+    if (frame) {
+      frame.addEventListener('load', function(){
+        loaded = true;
+        if (overlay) overlay.classList.add('d-none');
+      });
+    }
+    if (playBtn) playBtn.addEventListener('click', function(){
+      if (!frame) return;
+      frame.src = 'https://www.youtube.com/embed/yYhvjd3dWXI?controls=1&autoplay=1';
+    });
+    if (reloadBtn) reloadBtn.addEventListener('click', function(){
+      if (!frame) return;
+      frame.src = 'https://www.youtube.com/embed/yYhvjd3dWXI?controls=1';
+      if (overlay) overlay.classList.remove('d-none');
+    });
+    if (unloadBtn) unloadBtn.addEventListener('click', function(){
+      if (!frame) return;
+      frame.src = 'about:blank';
+      if (overlay) overlay.classList.remove('d-none');
+    });
+    setTimeout(function(){
+      if (!loaded && errorEl) errorEl.classList.remove('d-none');
+    }, 6000);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,1523 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alpha Scraper – Extract Instagram Data Without API</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/static/styles.css" rel="stylesheet">
+  <style>
+    /* FAQ Styling */
+    .faq-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      border: 1px solid rgba(0,0,0,.125);
+      border-radius: 0.375rem;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .faq-item:hover {
+      box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+    }
+    .faq-question {
+      padding: 1rem;
+      cursor: pointer;
+      position: relative;
+      font-weight: 500;
+      list-style: none;
+      background-color: var(--card-bg);
+    }
+    .faq-question::-webkit-details-marker { display: none; }
+    .faq-question::after {
+      content: '+';
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.5rem;
+      color: #0d6efd;
+      transition: transform 0.3s ease;
+    }
+    details[open] .faq-question::after { content: '−'; }
+    .faq-answer { background-color: var(--card-bg); border-top: 1px solid rgba(0,0,0,.125); }
+    .faq-answer p { margin-bottom: 0; }
+    /* Palestine Support Banner */
+    .pal-banner { background: #000; color: #fff; }
+    .pal-banner .pal-cursor::after { content: '|'; display:inline-block; margin-left: 4px; animation: pal-blink 1s step-end infinite; }
+    @keyframes pal-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  </style>
+</head>
+<body>
+<!-- Background Video Overlay -->
+<div class="bg-video-wrapper">
+  <video class="bg-video" autoplay muted loop playsinline>
+    <source src="/static/bg.mp4" type="video/mp4">
+  </video>
+  <div class="bg-overlay"></div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="#">Alpha Scraper</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-controls="navbarsExample" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExample">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="/logs">Logs</a></li>
+        <li class="nav-item"><a class="nav-link" href="/screenshot-guide">Screenshot Guide</a></li>
+      </ul>
+      <div class="ms-lg-3 mt-2 mt-lg-0">
+        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" type="button" title="Toggle theme" aria-label="Toggle theme">
+          <i id="themeIcon" class="bi bi-moon-stars"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Palestine Support Banner -->
+<div class="pal-banner py-2">
+  <div class="container text-center small">
+    <strong id="palTypewriter"></strong><span class="pal-cursor"></span>
+  </div>
+</div>
+
+<header class="py-4 bg-light border-bottom">
+  <div class="container">
+    <h1 class="display-6 fw-semibold mb-1">Alpha Scraper</h1>
+    <p class="lead typewriter"><span id="typewriter"></span><span class="cursor"></span></p>
+    <!-- <p class="text-muted mb-0">Modern, responsive and simple UI. No glassmorphism.</p> -->
+  </div>
+</header>
+
+<main class="container py-4">
+  <div class="row g-3">
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="feature-card h-100 p-3 border rounded-3 shadow-sm">
+        <div class="d-flex align-items-center mb-2">
+          <div class="icon-circle me-2 bg-primary-subtle text-primary">💬</div>
+          <h5 class="mb-0">Write Comments on Posts</h5>
+        </div>
+        <p class="text-muted small">Post comments on Instagram posts across multiple profiles.</p>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalComments">Open</button>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="feature-card h-100 p-3 border rounded-3 shadow-sm">
+        <div class="d-flex align-items-center mb-2">
+          <div class="icon-circle me-2 bg-info-subtle text-info">📊</div>
+          <h5 class="mb-0">Scrape Post Data</h5>
+        </div>
+        <p class="text-muted small">Extract captions, comments and likes.</p>
+        <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalPosts">Open</button>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="feature-card h-100 p-3 border rounded-3 shadow-sm">
+        <div class="d-flex align-items-center mb-2">
+          <div class="icon-circle me-2 bg-warning-subtle text-warning">👥</div>
+          <h5 class="mb-0">Scrape Followers</h5>
+        </div>
+        <p class="text-muted small">Scrape followers plus public emails & phones.</p>
+        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalFollowers">Open</button>
+      </div>
+    </div>
+
+    <!-- New: Tweets Scraper Card -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="feature-card h-100 p-3 border rounded-3 shadow-sm">
+        <div class="d-flex align-items-center mb-2">
+          <div class="icon-circle me-2 bg-info-subtle text-info">🐦</div>
+          <h5 class="mb-0">Scrape Tweets from any Twitter/X profile</h5>
+        </div>
+        <p class="text-muted small">Extract tweet text and basic metadata from profiles.</p>
+        <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalTweets">Open</button>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="feature-card h-100 p-3 border rounded-3 shadow-sm">
+        <div class="d-flex align-items-center mb-2">
+          <div class="icon-circle me-2 bg-danger-subtle text-danger">🎞️</div>
+          <h5 class="mb-0">Scrape Instagram Reels</h5>
+        </div>
+        <p class="text-muted small">Scrape reels data from a username profile URL.</p>
+
+        <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalReels">Open</button>
+      </div>
+    </div>
+
+    <!-- New: Reddit Comments Scraper Card -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="feature-card h-100 p-3 border rounded-3 shadow-sm">
+        <div class="d-flex align-items-center mb-2">
+          <div class="icon-circle me-2 bg-info-subtle text-info">👽</div>
+          <h5 class="mb-0">Scrape Reddit Comments</h5>
+        </div>
+        <p class="text-muted small">Extract comments from Reddit posts by keyword.</p>
+        <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalRedditComments">Open</button>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="feature-card h-100 p-3 border rounded-3 shadow-sm">
+        <div class="d-flex align-items-center mb-2">
+          <div class="icon-circle me-2 bg-secondary-subtle text-secondary">🔒</div>
+          <h5 class="mb-0">Find Targeted Audience</h5>
+        </div>
+        <p class="text-muted small">Coming in v2.0</p>
+        <button class="btn btn-secondary btn-sm" disabled>Locked</button>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="feature-card glow-red h-100 p-3 border rounded-3 shadow-sm">
+        <div class="d-flex align-items-center mb-2">
+          <div class="icon-circle me-2 bg-dark-subtle text-dark">📊</div>
+          <h5 class="mb-0">View & Analyze Data</h5>
+        </div>
+        <p class="text-muted small">Preview scraped files and run AI analysis.</p>
+        <a href="/analyze" class="btn btn-dark btn-sm">Open Dashboard</a>
+      </div>
+    </div>
+    <!-- removed legacy Reports & AI Analysis card -->
+  </div>
+
+  <section class="mt-4">
+    <div class="terminal p-3 border rounded-3 bg-white">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">Live Logs</h6>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge text-bg-warning">Use responsibly. May violate Instagram terms.</span>
+          <button id="btnClearLiveLogs" class="btn btn-sm btn-danger" type="button" title="Clear live logs">
+            <i class="bi bi-trash3 me-1"></i> Clear logs
+          </button>
+        </div>
+      </div>
+      <div id="logs" class="small" style="height:200px; overflow:auto; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;"></div>
+    </div>
+  </section>
+  
+  <!-- FAQ Section -->
+  <section class="faq-section py-5" id="faq">
+    <div class="container">
+      <h2 class="mb-4 text-center">Frequently Asked Questions</h2>
+      <div class="accordion" id="faqAccordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+              Q1: Can I scrape the email or phone numbers of Instagram users using this tool?
+            </button>
+          </h2>
+          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              <p>✅ Yes, you can scrape the email or phone numbers of Instagram users <strong>only if they are displayed in the Bio section</strong> of the profile.<br>
+              ❌ You cannot scrape emails or phone numbers that are hidden or only accessible via Instagram's "Contact" button.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingTwo">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              Q2: Can I scrape followers of any Instagram account?
+            </button>
+          </h2>
+          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              <p>⚠️ No, you can only scrape followers from accounts where the <strong>followers list is public</strong>.<br>
+              For example, celebrities like Shahid Afridi, Imran Khan, The Rock, or John Cena usually keep their followers private, so you won't be able to scrape them.<br>
+              👉 Also note: you can only extract a <strong>limited number of followers</strong> per account using this tool.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingThree">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+              Q3: How many messages can I send to users using this tool?
+            </button>
+          </h2>
+          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              <p>📩 You can send up to <strong>50 messages at a time</strong>.<br>
+              ⚠️ However, this feature is risky – Instagram may temporarily or permanently suspend your account.<br>
+              ✅ Best practice: use multiple Instagram accounts with this tool.<br>
+              ❌ Disclaimer: I am not responsible for account suspensions due to misuse.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingFour">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+              Q4: Can I find targeted audiences on Instagram with this tool?
+            </button>
+          </h2>
+          <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              <p>🔍 This feature is <strong>not available in version 1.0</strong>.<br>
+              ✅ It is planned for a future release (InshaAllah), where you'll be able to find niche-specific users directly.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingFive">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+              Q5: Will it suspend my Instagram account?
+            </button>
+          </h2>
+          <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              <p>⚠️ <strong>Partially yes</strong> if you frequently post comments and send DMs without following Instagram's policies.<br>
+              📊 Instagram has strict limits:<br>
+              • <strong>DM limits:</strong> 20-50 messages per day for new accounts, 50-100 for established accounts<br>
+              • <strong>Hourly limits:</strong> 5-15 messages per hour depending on account age<br>
+              • <strong>Comments/actions:</strong> Maximum 300 likes or 60 comments per hour<br>
+              • <strong>Forwarding:</strong> Messages can only be forwarded to 5 chats at a time<br><br>
+              🚫 <strong>Potential consequences:</strong><br>
+              • Temporary restrictions (hours to days)<br>
+              • Reduced account visibility (shadowban)<br>
+              • Account suspension for repeated violations<br><br>
+              📌 <strong>Instagram policy links:</strong><br>
+              • <a href="https://help.instagram.com/436248864916865" target="_blank">Instagram DM Limits</a><br>
+              • <a href="https://www.instagram.com/terms/accept/" target="_blank">Instagram Terms of Use</a></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingSix">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+              Q6: What is the best practice to use this tool?
+            </button>
+          </h2>
+          <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              For safety, do not use your official or primary Instagram account for scraping or automation. Maintain and rotate multiple separate accounts dedicated to scraping. This reduces the risk of your main account being flagged or banned, as scraping and automation can violate Instagram’s Terms and pose a high ban risk.
+            </div>
+          </div>
+        </div>
+        
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingSeven">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+              Q7: Can I scrape the latest tweets from any hashtag on Twitter\X?
+            </button>
+          </h2>
+          <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              No, sorry — you can only scrape tweets from a profile. To scrape the latest tweets, you need APIs from Octoparse or Apify, etc.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Modals -->
+<div class="modal fade" id="modalComments" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Write Comments on Posts</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body"> 
+
+        <!-- OLD Label code -->
+        <div class="col-12">
+            <div class="alert alert-success d-flex align-items-center py-2 small">
+              <i class="bi bi-key-fill me-2"></i>
+              <span>Auto-login enabled: Credentials will be read from your .env file (INSTAGRAM_USERNAME and INSTAGRAM_PASSWORD).</span>
+            </div>
+        </div>
+
+
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Accounts</label>
+            <div id="accountsList" class="d-grid gap-2"></div>
+            <button class="btn btn-outline-primary btn-sm mt-2" id="addAccount">Add Account</button>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Comments (.txt)</label>
+            <input id="commentsFile" type="file" accept=".txt" class="form-control">
+            <textarea id="commentsPreview" class="form-control mt-2" rows="4" placeholder="Preview..." readonly></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Target Profiles (one URL per line)</label>
+            <textarea id="profiles" class="form-control" rows="4" placeholder="https://instagram.com/user1\nhttps://instagram.com/user2"></textarea>
+          </div>
+          <div class="col-6">
+            <label class="form-label">Number of comments</label>
+            <select id="commentsCount" class="form-select">
+              <option>5</option><option>10</option><option>15</option><option>20</option><option>25</option><option>30</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label">Time interval (seconds)</label>
+            <select id="commentsInterval" class="form-select">
+              <option>30</option><option>45</option><option>60</option><option>75</option><option>90</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <span class="badge text-bg-warning">Excessive commenting may suspend your account.</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="startComments" class="btn btn-success">
+          <i class="bi bi-play-fill"></i> Run
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New: Instagram Reels Scraper Modal -->
+<div class="modal fade" id="modalReels" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Scrape Instagram Reels</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+          <!-- OLD Label code -->
+          <div class="col-12">
+            <div class="alert alert-success d-flex align-items-center py-2 small">
+              <i class="bi bi-key-fill me-2"></i>
+              <span>Auto-login enabled: Credentials will be read from your .env file (INSTAGRAM_USERNAME and INSTAGRAM_PASSWORD).</span>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="alert alert-warning d-flex align-items-center py-2 small">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <span>To make this feature work properly, you may need to take a few screenshots—especially if you're using macOS or Linux. <a href="https://www.youtube.com/" target="_blank"> <strong> Click Here</strong> </a> to see a video, for how to take screenshots. You can also see the Guide on Screenshot Window</span> 
+            </div>
+          </div>
+
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label" for="reelsProfileUrl">Profile URL</label>
+            <input id="reelsProfileUrl" class="form-control" placeholder="https://instagram.com/username" aria-describedby="reelsUrlHelp">
+            <small id="reelsUrlHelp" class="text-muted">Only username profiles. No /p/, /help, /settings, etc.</small>
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="reelsCount">Number of Reels</label>
+            <input id="reelsCount" class="form-control" type="number" min="1" value="10" aria-describedby="reelsCountHelp">
+            <small id="reelsCountHelp" class="text-muted">Positive integer, default 10.</small>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="startReels" class="btn btn-success">
+          <i class="bi bi-play-fill"></i> Run
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="modalPosts" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Scrape Post Data</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <div class="alert alert-success d-flex align-items-center py-2 small">
+              <i class="bi bi-key-fill me-2"></i>
+              <span>Auto-login enabled: Credentials will be read from your .env file (INSTAGRAM_USERNAME and INSTAGRAM_PASSWORD).</span>
+            </div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Profile URL</label>
+            <input id="postProfile" class="form-control" placeholder="https://instagram.com/username">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Number of posts</label>
+            <select id="postCount" class="form-select">
+              <option>5</option><option>10</option><option>20</option><option>50</option><option>100</option><option>200</option><option>500</option>
+            </select>
+          </div>
+          <div class="col-6 d-flex align-items-end">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="scrapeComments">
+              <label class="form-check-label" for="scrapeComments">Scrape comments</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="startPosts" class="btn btn-success">
+          <i class="bi bi-play-fill"></i> Run
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalFollowers" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Scrape Followers</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <div class="alert alert-success d-flex align-items-center py-2 small">
+              <i class="bi bi-key-fill me-2"></i>
+              <span>Auto-login enabled: Credentials will be read from your .env file (INSTAGRAM_USERNAME and INSTAGRAM_PASSWORD).</span>
+            </div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Profile URL</label>
+            <input id="followersProfile" class="form-control" placeholder="https://instagram.com/username">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Scroll Count</label>
+            <select id="followersScroll" class="form-select">
+              <option>5</option><option>10</option><option>20</option><option>30</option><option>40</option><option>50</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="startFollowers" class="btn btn-success">
+          <i class="bi bi-play-fill"></i> Run
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New: Tweets Scraper Modal -->
+<div class="modal fade" id="modalTweets" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Scrape Tweets from any Twitter/X profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <button class="btn btn-warning w-100" type="button" disabled>
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              Note: Only scrapes tweets from profiles (not hashtags/keywords). Excludes latest tweets. Captures text data only.
+            </button>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Profile URL</label>
+            <input id="tweetsProfileUrl" class="form-control" placeholder="https://x.com/username or https://twitter.com/username">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Scroll Count</label>
+            <select id="tweetsScrolls" class="form-select">
+              <option>5</option><option>10</option><option>15</option><option>20</option><option>25</option><option>30</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="startTweets" class="btn btn-success">
+          <i class="bi bi-play-fill"></i> Run
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New: Reddit Comments Scraper Modal -->
+<div class="modal fade" id="modalRedditComments" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Scrape Reddit Comments</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Keyword</label>
+            <input id="redditKeyword" class="form-control" placeholder="e.g., AI marketing">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Number of Posts</label>
+            <select id="redditNumPosts" class="form-select">
+              <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+              <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+              <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+              <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+              <option>21</option><option>22</option><option>23</option><option>24</option><option>25</option>
+              <option>26</option><option>27</option><option>28</option><option>29</option><option>30</option>
+              <option>31</option><option>32</option><option>33</option><option>34</option><option>35</option>
+              <option>36</option><option>37</option><option>38</option><option>39</option><option>40</option>
+              <option>41</option><option>42</option><option>43</option><option>44</option><option>45</option>
+              <option>46</option><option>47</option><option>48</option><option>49</option><option>50</option>
+              <option>51</option><option>52</option><option>53</option><option>54</option><option>55</option>
+              <option>56</option><option>57</option><option>58</option><option>59</option><option>60</option>
+              <option>61</option><option>62</option><option>63</option><option>64</option><option>65</option>
+              <option>66</option><option>67</option><option>68</option><option>69</option><option>70</option>
+              <option>71</option><option>72</option><option>73</option><option>74</option><option>75</option>
+              <option>76</option><option>77</option><option>78</option><option>79</option><option>80</option>
+              <option>81</option><option>82</option><option>83</option><option>84</option><option>85</option>
+              <option>86</option><option>87</option><option>88</option><option>89</option><option>90</option>
+              <option>91</option><option>92</option><option>93</option><option>94</option><option>95</option>
+              <option>96</option><option>97</option><option>98</option><option>99</option><option>100</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="startRedditScrape" class="btn btn-success">
+          <i class="bi bi-play-fill"></i> Run
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade success-modal" id="modalSuccess" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content text-center p-3">
+      <div class="modal-body">
+        <div class="mb-2">
+          <i class="bi bi-check2-circle success-icon"></i>
+        </div>
+        <h5 id="successTitle" class="mb-1">Success</h5>
+        <p id="successMessage" class="text-muted mb-0">Task is successfully completed.</p>
+      </div>
+      <div class="modal-footer border-0 justify-content-center pt-0">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+          <i class="bi bi-check2-circle me-1"></i> OK
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Processing Modal (shown on Run) -->
+<div class="modal fade" id="modalProcessing" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content text-center p-3">
+      <div class="modal-body">
+        <div class="mb-2">
+          <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+        </div>
+        <h6 id="processingTitle" class="mb-1">Starting…</h6>
+        <p id="processingMessage" class="text-muted mb-0">Beginning task. Watch Live Logs for progress.</p>
+        <div class="mt-3" aria-live="polite">
+          <div class="progress" style="height: 6px;">
+            <div id="processingProgress" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0%"></div>
+          </div>
+          <small id="processingEta" class="text-muted d-block mt-1">Estimating time…</small>
+          <button id="btnCancelProcessing" type="button" class="btn btn-outline-danger btn-sm mt-2" aria-label="Cancel current operation">Cancel</button>
+        </div>
+      </div>
+      <div class="modal-footer border-0 justify-content-center pt-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hide</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+<div class="modal fade" id="modalReelsSuccess" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reels scraping completed</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="reelsSuccessMsg" class="alert alert-success mb-3" role="alert" aria-live="polite"></div>
+        <div class="row g-3">
+          <div class="col-12 col-lg-4">
+            <div class="border rounded p-3 h-100">
+              <h6 class="mb-2">Download files</h6>
+              <div id="reelsDownloads"></div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-8">
+            <div class="border rounded p-3">
+              <h6 class="mb-2">Scraping summary</h6>
+              <div class="mb-2 text-success" id="reelsConfirm">Scraping completed successfully!</div>
+              <div class="mb-2"><strong>Completed at:</strong> <span id="reelsCompletedAt"></span></div>
+              <div class="mb-2"><strong>Total reels processed:</strong> <span id="reelsCount"></span></div>
+              <div class="mb-2"><strong>Generated files (full paths):</strong>
+                <ul id="reelsFiles" class="small mb-0"></ul>
+              </div>
+              <hr class="my-3">
+              <h6 class="mb-2">Data visualizations</h6>
+              <div class="row g-3" id="reelsGraphs">
+                <div class="col-12 col-md-6"><img alt="Likes histogram" class="img-fluid rounded" src="" id="graphLikesHist"></div>
+                <div class="col-12 col-md-6"><img alt="Likes boxplot" class="img-fluid rounded" src="" id="graphLikesBox"></div>
+                <div class="col-12"><img alt="Captions wordcloud" class="img-fluid rounded" src="" id="graphWordcloud"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="/analyze" class="btn btn-primary">Open Data Visualization</a>
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+  // Theme toggle with persistence
+  (function(){
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initial = stored || (prefersDark ? 'dark' : 'light');
+    applyTheme(initial);
+
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.addEventListener('click', ()=>{
+      const next = (document.documentElement.getAttribute('data-bs-theme') === 'dark') ? 'light' : 'dark';
+      applyTheme(next);
+      localStorage.setItem('theme', next);
+    });
+
+    function applyTheme(t){
+      document.documentElement.setAttribute('data-bs-theme', t);
+      const icon = document.getElementById('themeIcon');
+      if (icon) icon.className = (t === 'dark') ? 'bi bi-sun-fill' : 'bi bi-moon-stars';
+    }
+  })();
+
+  const socket = io();
+  const logsEl = document.getElementById('logs');
+
+  // Start fresh: do not preload previous logs on home page.
+  // The live log area will only show new messages received during this session.
+  // (Removed initial fetch of /api/logs)
+
+  socket.on('log', (data) => {
+    const div = document.createElement('div');
+    div.textContent = data.message;
+    logsEl.appendChild(div);
+    logsEl.scrollTop = logsEl.scrollHeight;
+
+    // Detect task completion and show success modal + close start modal
+    const msg = (data.message || '').normalize('NFKC');
+    const match = msg.match(/\]\s(.+?)\s[–-]\s(completed successfully|report generated)/);
+    if (match) {
+      const taskName = match[1].trim();
+
+      // Map task name to its start modal id
+      const modalMap = {
+        'Write Comments on Posts': 'modalComments',
+        'Scrape Post Data': 'modalPosts',
+        'Scrape Followers': 'modalFollowers',
+        'Scrape Tweets from any Twitter/X profile': 'modalTweets',
+        'Scrape Reddit Comments': 'modalRedditComments'
+      };
+      const automationTasks = new Set(['Write Comments on Posts']);
+      const scrapingTasks = new Set(['Scrape Post Data','Scrape Followers','Scrape Tweets from any Twitter/X profile','Scrape Reddit Comments']);
+
+      // Close the start modal if open
+      const startModalId = modalMap[taskName];
+      if (startModalId) {
+        const el = document.getElementById(startModalId);
+        if (el) {
+          const inst = bootstrap.Modal.getOrCreateInstance(el);
+          inst.hide();
+        }
+      }
+
+      // Show success modal with appropriate title
+      let title = 'Task completed';
+      if (automationTasks.has(taskName)) title = 'Automation completed';
+      else if (scrapingTasks.has(taskName)) title = 'Scraping completed';
+
+      // Special case: Reels – show detailed success modal
+      if (taskName === 'Scrape Instagram Reels') {
+        if (window.__procTimer) { try{ clearInterval(window.__procTimer); }catch{} }
+        const p = document.getElementById('modalProcessing');
+        if (p) { const inst = bootstrap.Modal.getOrCreateInstance(p); inst.hide(); }
+        const downloadsEl = document.getElementById('reelsDownloads');
+        const graphsBase = '/graphs/';
+        const msgEl = document.getElementById('reelsSuccessMsg');
+        if (downloadsEl) {
+          downloadsEl.innerHTML = '';
+          fetch('/api/list-files').then(r=>r.json()).then(j=>{
+            const files = (j.files||[]).filter(f=>f.file==='Instagram_user_reels_data.xlsx' || f.file==='Instagram_user_reels_data.json');
+            let excelName = '', jsonName = '';
+            files.forEach(f=>{
+              const a = document.createElement('a');
+              a.href = '/download?file='+encodeURIComponent(f.file);
+              a.className = 'btn btn-outline-primary btn-sm w-100 mb-2';
+              a.textContent = `${f.file} · ${Math.round((f.size||0)/1024)} KB · ${f.created||''}`;
+              downloadsEl.appendChild(a);
+              if (f.file.endsWith('.xlsx')) excelName = f.file;
+              if (f.file.endsWith('.json')) jsonName = f.file;
+            });
+            if (msgEl) {
+              const excelLabel = excelName || 'Instagram_user_reels_data.xlsx';
+              const jsonLabel = jsonName || 'Instagram_user_reels_data.json';
+              msgEl.textContent = `Data saved in files: ${excelLabel} and ${jsonLabel}. View graphs below or open Data Visualization.`;
+            }
+          });
+        }
+        fetch('/api/reels-summary').then(r=>r.json()).then(s=>{
+          if (s && s.ok) {
+            const atEl = document.getElementById('reelsCompletedAt');
+            const cntEl = document.getElementById('reelsCount');
+            const listEl = document.getElementById('reelsFiles');
+            if (atEl) atEl.textContent = s.completed_at || '';
+            if (cntEl) cntEl.textContent = String(s.reels_count || 0);
+            if (listEl) {
+              listEl.innerHTML = '';
+              (s.files||[]).forEach(f=>{
+                const li = document.createElement('li');
+                li.textContent = (f.path || f.name || '');
+                listEl.appendChild(li);
+              });
+            }
+          }
+        }).catch(()=>{});
+        const likesHist = document.getElementById('graphLikesHist');
+        const likesBox = document.getElementById('graphLikesBox');
+        const wordcloud = document.getElementById('graphWordcloud');
+        if (likesHist) likesHist.src = graphsBase+'likes_histogram.png';
+        if (likesBox) likesBox.src = graphsBase+'likes_boxplot.png';
+        if (wordcloud) wordcloud.src = graphsBase+'captions_wordcloud.png';
+        const el = document.getElementById('modalReelsSuccess');
+        if (el) { const inst = bootstrap.Modal.getOrCreateInstance(el); inst.show(); }
+        return;
+      }
+
+      const successEl = document.getElementById('modalSuccess');
+      if (successEl) {
+        successEl.querySelector('#successTitle').textContent = title;
+        const defaultMsg = 'Task is successfully completed.';
+        const tweetsMsg = 'Tweets scraping completed successfully. Files Tweets_Data.xlsx and tweets_data.json are ready for viewing. Open the View & Analyze Data dashboard and use the date selection option to filter by created time.';
+        const redditMsg = 'Scraping completed successfully. Data saved to: Reddit_comments_data.json and Reddit_comments_data.xlsx';
+        successEl.querySelector('#successMessage').textContent = (taskName === 'Scrape Tweets from any Twitter/X profile') ? tweetsMsg : (taskName === 'Scrape Reddit Comments' ? redditMsg : defaultMsg);
+        const successModal = bootstrap.Modal.getOrCreateInstance(successEl);
+        successModal.show();
+        const duration = (taskName === 'Scrape Tweets from any Twitter/X profile') ? 8000 : 3500;
+        setTimeout(() => successModal.hide(), duration);
+      }
+
+      // Also close processing modal if open
+      const procEl = document.getElementById('modalProcessing');
+      if (procEl) {
+        const procInst = bootstrap.Modal.getOrCreateInstance(procEl);
+        procInst.hide();
+      }
+    }
+  });
+
+  // Also listen for explicit completion event from backend
+  socket.on('task_completed', ({ task_name }) => {
+    const modalMap = {
+      'Write Comments on Posts': 'modalComments',
+      'Scrape Post Data': 'modalPosts',
+      'Scrape Followers': 'modalFollowers',
+      'Scrape Tweets from any Twitter/X profile': 'modalTweets',
+      'Scrape Reddit Comments': 'modalRedditComments'
+    };
+    const automationTasks = new Set(['Write Comments on Posts']);
+    const scrapingTasks = new Set(['Scrape Post Data','Scrape Followers','Scrape Tweets from any Twitter/X profile','Scrape Reddit Comments']);
+
+    // Close the start modal if open
+    const startModalId = modalMap[task_name];
+    if (startModalId) {
+      const el = document.getElementById(startModalId);
+      if (el) {
+        const inst = bootstrap.Modal.getOrCreateInstance(el);
+        inst.hide();
+      }
+    }
+
+    // Show success modal
+    let title = 'Task completed';
+    if (automationTasks.has(task_name)) title = 'Automation completed';
+    else if (scrapingTasks.has(task_name)) title = 'Scraping completed';
+
+      if (task_name === 'Scrape Instagram Reels') {
+      if (window.__procTimer) { try{ clearInterval(window.__procTimer); }catch{} }
+      const p = document.getElementById('modalProcessing');
+      if (p) { const inst = bootstrap.Modal.getOrCreateInstance(p); inst.hide(); }
+      const downloadsEl = document.getElementById('reelsDownloads');
+      const graphsBase = '/graphs/';
+      const msgEl = document.getElementById('reelsSuccessMsg');
+      if (downloadsEl) {
+        downloadsEl.innerHTML = '';
+        fetch('/api/list-files').then(r=>r.json()).then(j=>{
+          const files = (j.files||[]).filter(f=>f.file==='Instagram_user_reels_data.xlsx' || f.file==='Instagram_user_reels_data.json');
+          let excelName = '', jsonName = '';
+          files.forEach(f=>{
+            const a = document.createElement('a');
+            a.href = '/download?file='+encodeURIComponent(f.file);
+            a.className = 'btn btn-outline-primary btn-sm w-100 mb-2';
+            a.textContent = `${f.file} · ${Math.round((f.size||0)/1024)} KB · ${f.created||''}`;
+            downloadsEl.appendChild(a);
+            if (f.file.endsWith('.xlsx')) excelName = f.file;
+            if (f.file.endsWith('.json')) jsonName = f.file;
+          });
+          if (msgEl) {
+            const excelLabel = excelName || 'Instagram_user_reels_data.xlsx';
+            const jsonLabel = jsonName || 'Instagram_user_reels_data.json';
+            msgEl.textContent = `Data saved in files: ${excelLabel} and ${jsonLabel}. View graphs below or open Data Visualization.`;
+          }
+        });
+      }
+      fetch('/api/reels-summary').then(r=>r.json()).then(s=>{
+        if (s && s.ok) {
+          const atEl = document.getElementById('reelsCompletedAt');
+          const cntEl = document.getElementById('reelsCount');
+          const listEl = document.getElementById('reelsFiles');
+          if (atEl) atEl.textContent = s.completed_at || '';
+          if (cntEl) cntEl.textContent = String(s.reels_count || 0);
+          if (listEl) {
+            listEl.innerHTML = '';
+            (s.files||[]).forEach(f=>{
+              const li = document.createElement('li');
+              li.textContent = (f.path || f.name || '');
+              listEl.appendChild(li);
+            });
+          }
+        }
+      }).catch(()=>{});
+      const likesHist = document.getElementById('graphLikesHist');
+      const likesBox = document.getElementById('graphLikesBox');
+      const wordcloud = document.getElementById('graphWordcloud');
+      if (likesHist) likesHist.src = graphsBase+'likes_histogram.png';
+      if (likesBox) likesBox.src = graphsBase+'likes_boxplot.png';
+      if (wordcloud) wordcloud.src = graphsBase+'captions_wordcloud.png';
+      const el = document.getElementById('modalReelsSuccess');
+      if (el) { const inst = bootstrap.Modal.getOrCreateInstance(el); inst.show(); }
+      return;
+    }
+    const successEl = document.getElementById('modalSuccess');
+    if (successEl) {
+      successEl.querySelector('#successTitle').textContent = title;
+      const defaultMsg = 'Task is successfully completed.';
+      const tweetsMsg = 'Tweets scraping completed successfully. Files Tweets_Data.xlsx and tweets_data.json are ready for viewing. Open the View & Analyze Data dashboard and use the date selection option to filter by created time.';
+      const redditMsg = 'Scraping completed successfully. Data saved to: Reddit_comments_data.json and Reddit_comments_data.xlsx';
+      successEl.querySelector('#successMessage').textContent = (task_name === 'Scrape Tweets from any Twitter/X profile') ? tweetsMsg : (task_name === 'Scrape Reddit Comments' ? redditMsg : defaultMsg);
+      const successModal = bootstrap.Modal.getOrCreateInstance(successEl);
+      successModal.show();
+      const duration = (task_name === 'Scrape Tweets from any Twitter/X profile') ? 8000 : 3500;
+      setTimeout(() => successModal.hide(), duration);
+    }
+
+    // Also close processing modal if open
+    const procEl = document.getElementById('modalProcessing');
+    if (procEl) {
+      const procInst = bootstrap.Modal.getOrCreateInstance(procEl);
+      procInst.hide();
+    }
+  });
+
+  // Typewriter effect for rotating headlines
+  (function(){
+    const el = document.getElementById('typewriter');
+    if(!el) return;
+    const messages = [
+      'Tool built for data lovers.',
+      'The choice of marketers.',
+      'Extract insights. Grow smarter.',
+      'Automate, analyze, achieve.'
+    ];
+    let msgIndex = 0, charIndex = 0, deleting = false;
+    const typeSpeed = 70, deleteSpeed = 40, holdTime = 1200;
+
+    function tick(){
+      const current = messages[msgIndex];
+      if(!deleting){
+        el.textContent = current.slice(0, ++charIndex);
+        if(charIndex === current.length){
+          deleting = true;
+          setTimeout(tick, holdTime);
+          return;
+        }
+        setTimeout(tick, typeSpeed);
+      } else {
+        el.textContent = current.slice(0, --charIndex);
+        if(charIndex === 0){
+          deleting = false;
+          msgIndex = (msgIndex + 1) % messages.length;
+          setTimeout(tick, 300);
+          return;
+        }
+        setTimeout(tick, deleteSpeed);
+      }
+    }
+    tick();
+  })();
+
+  // Palestine banner typewriter
+  (function(){
+    const el = document.getElementById('palTypewriter');
+    if(!el) return;
+    const messages = [
+      'Free Palestine',
+      'Stand with the people of Gaza',
+      'Palestine needs support',
+      'End the occupation',
+      'Human rights for all',
+      'We always stand with Palestine'
+    ];
+    let msgIndex = 0, charIndex = 0, deleting = false;
+    const typeSpeed = 60, deleteSpeed = 35, holdTime = 1400;
+
+    function tick(){
+      const current = messages[msgIndex];
+      if(!deleting){
+        el.textContent = current.slice(0, ++charIndex);
+        if(charIndex === current.length){
+          deleting = true;
+          setTimeout(tick, holdTime);
+          return;
+        }
+        setTimeout(tick, typeSpeed);
+      } else {
+        el.textContent = current.slice(0, --charIndex);
+        if(charIndex === 0){
+          deleting = false;
+          msgIndex = (msgIndex + 1) % messages.length;
+          setTimeout(tick, 300);
+          return;
+        }
+        setTimeout(tick, deleteSpeed);
+      }
+    }
+    tick();
+  })();
+
+  // Comments modal
+  document.getElementById('addAccount').addEventListener('click', () => {
+    const id = Math.random().toString(36).slice(2);
+    const wrapper = document.createElement('div');
+    wrapper.className = 'account-item input-group';
+    wrapper.innerHTML = `
+      <input class="form-control" placeholder="Username">
+      <input class="form-control" placeholder="Password" type="password">
+      <button class="btn btn-outline-secondary toggle-pass" type="button" title="Show/Hide password"><i class="bi bi-eye"></i></button>
+      <button class="btn btn-outline-danger" type="button" title="Remove account">Delete</button>
+    `;
+    const delBtn = wrapper.querySelector('button.btn-outline-danger');
+    delBtn.onclick = () => wrapper.remove();
+    const toggleBtn = wrapper.querySelector('.toggle-pass');
+    const passInput = wrapper.querySelector('input[placeholder="Password"]');
+    toggleBtn.addEventListener('click', ()=>{
+      const icon = toggleBtn.querySelector('i');
+      if(passInput.type === 'password'){
+        passInput.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+      } else {
+        passInput.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+      }
+    });
+    document.getElementById('accountsList').appendChild(wrapper);
+  });
+
+  function readTxtFile(inputEl, previewEl){
+    const file = inputEl.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      previewEl.value = reader.result;
+    };
+    reader.readAsText(file);
+  }
+
+  document.getElementById('commentsFile').addEventListener('change', (e)=> readTxtFile(e.target, document.getElementById('commentsPreview')));
+
+  function lines(text){
+    return text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  }
+
+  // Clear only the live logs shown on the main screen (does not delete file)
+  const btnClearLiveLogs = document.getElementById('btnClearLiveLogs');
+  if (btnClearLiveLogs) {
+    btnClearLiveLogs.addEventListener('click', ()=>{
+      if (logsEl) logsEl.innerHTML = '';
+    });
+  }
+
+  // ENV check helper before allowing any operation
+  async function checkEnvFile(){
+    try {
+      const res = await fetch('/api/env-status');
+      return await res.json();
+    } catch (e) {
+      return { ok: false, message: 'Failed to check environment.' };
+    }
+  }
+
+  // Instagram URL validation (front-end guard)
+  function isValidInstagramUrl(u){
+    try {
+      const url = new URL(u.startsWith('http') ? u : 'https://'+u);
+      const host = (url.hostname || '').toLowerCase();
+      const validHost = host === 'instagram.com' || host === 'www.instagram.com' || host === 'm.instagram.com' || host.endsWith('.instagram.com');
+      return validHost && url.pathname && url.pathname !== '/';
+    } catch {
+      return false;
+    }
+  }
+
+  // Intercept Open buttons to enforce ENV presence before opening modals
+  function setupModalOpenEnvGuard(selector, modalId){
+    const btns = document.querySelectorAll(selector);
+    if(!btns || btns.length === 0) return;
+    // Disable Bootstrap's automatic modal toggling on these buttons
+    btns.forEach(b => b.removeAttribute('data-bs-toggle'));
+    btns.forEach(btn => {
+      btn.addEventListener('click', async (e)=>{
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        e.stopPropagation();
+        const status = await checkEnvFile();
+        if(!status.ok){
+          alert(status.message || 'Please add a .env file with INSTAGRAM_USERNAME & INSTAGRAM_PASSWORD.');
+          return;
+        }
+        const el = document.getElementById(modalId);
+        if(el){
+          const inst = bootstrap.Modal.getOrCreateInstance(el);
+          inst.show();
+        }
+      }, { capture: true });
+    });
+  }
+  setupModalOpenEnvGuard('button[data-bs-target="#modalComments"]', 'modalComments');
+  setupModalOpenEnvGuard('button[data-bs-target="#modalPosts"]', 'modalPosts');
+  setupModalOpenEnvGuard('button[data-bs-target="#modalFollowers"]', 'modalFollowers');
+  setupModalOpenEnvGuard('button[data-bs-target="#modalReels"]', 'modalReels');
+  // Tweets scraper does not require Instagram ENV; keep default Bootstrap behavior
+
+  document.getElementById('startComments').addEventListener('click', async ()=>{
+    const btn = document.getElementById('startComments');
+    const spinner = btn.querySelector('.spinner-border');
+    
+    // Show loading state
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+    
+    try {
+      const accounts = Array.from(document.querySelectorAll('#accountsList .account-item')).map(w=>({
+        username: w.children[0].value.trim(),
+        password: w.children[1].value.trim(),
+      })).filter(a=>a.username && a.password);
+      const comments = lines(document.getElementById('commentsPreview').value);
+      const profiles = lines(document.getElementById('profiles').value);
+      const number_of_comments = parseInt(document.getElementById('commentsCount').value,10) || 5;
+
+      // Front-end guard: ENV
+      const status = await checkEnvFile();
+      if(!status.ok){
+        alert(status.message || 'Please add a .env file with INSTAGRAM_USERNAME & INSTAGRAM_PASSWORD.');
+        return;
+      }
+      // Front-end guard: URL validation
+      const bad = profiles.find(p=>!isValidInstagramUrl(p));
+      if(bad){
+        alert('Invalid Instagram URL detected: '+ bad);
+        return;
+      }
+
+      const res = await fetch('/api/write-comments', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({accounts, comments, profiles, number_of_comments})});
+      const data = await res.json();
+      alert(data.message || (data.ok? 'Started':'Failed'));
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred: ' + error.message);
+    } finally {
+      // Reset button state
+      btn.disabled = false;
+      spinner.classList.add('d-none');
+    }
+  });
+
+
+  document.getElementById('startPosts').addEventListener('click', async ()=>{
+    const btn = document.getElementById('startPosts');
+    const spinner = btn.querySelector('.spinner-border');
+    
+    // Show loading state
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+    
+    try {
+      const profile_url = document.getElementById('postProfile').value.trim();
+      const num_posts = parseInt(document.getElementById('postCount').value,10) || 10;
+      const scrape_comments = document.getElementById('scrapeComments').checked;
+
+      // Front-end guard: ENV
+      const status = await checkEnvFile();
+      if(!status.ok){
+        alert(status.message || 'Please add a .env file with INSTAGRAM_USERNAME & INSTAGRAM_PASSWORD.');
+        return;
+      }
+      // Front-end guard: URL validation
+      if(!isValidInstagramUrl(profile_url)){
+        alert('Invalid Instagram URL: '+ profile_url);
+        return;
+      }
+
+      const res = await fetch('/api/scrape-posts', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({profile_url, num_posts, scrape_comments})});
+      const data = await res.json();
+      alert(data.message || (data.ok? 'Started':'Failed'));
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred: ' + error.message);
+    } finally {
+      // Reset button state
+      btn.disabled = false;
+      spinner.classList.add('d-none');
+    }
+  });
+
+  document.getElementById('startFollowers').addEventListener('click', async ()=>{
+    const btn = document.getElementById('startFollowers');
+    const spinner = btn.querySelector('.spinner-border');
+    
+    // Show loading state
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+    
+    try {
+      const profile_url = document.getElementById('followersProfile').value.trim();
+      const scroll_count = parseInt(document.getElementById('followersScroll').value,10) || 5;
+
+      // Front-end guard: ENV
+      const status = await checkEnvFile();
+      if(!status.ok){
+        alert(status.message || 'Please add a .env file with INSTAGRAM_USERNAME & INSTAGRAM_PASSWORD.');
+        return;
+      }
+      // Front-end guard: URL validation
+      if(!isValidInstagramUrl(profile_url)){
+        alert('Invalid Instagram URL: '+ profile_url);
+        return;
+      }
+
+      const res = await fetch('/api/scrape-followers', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({profile_url, scroll_count})});
+      const data = await res.json();
+      alert(data.message || (data.ok? 'Started':'Failed'));
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred: ' + error.message);
+    } finally {
+      // Reset button state
+      btn.disabled = false;
+      spinner.classList.add('d-none');
+    }
+  });
+
+  // Twitter/X URL validation (front-end guard)
+  function isValidTwitterUrl(u){
+    try {
+      const url = new URL(u.startsWith('http') ? u : 'https://'+u);
+      const host = (url.hostname || '').toLowerCase();
+      const validHost = host === 'twitter.com' || host === 'www.twitter.com' || host === 'x.com' || host === 'www.x.com';
+      return validHost && url.pathname && url.pathname !== '/';
+    } catch {
+      return false;
+    }
+  }
+
+  // Start Tweets scraping
+  document.getElementById('startTweets').addEventListener('click', async ()=>{
+    const btn = document.getElementById('startTweets');
+    const spinner = btn.querySelector('.spinner-border');
+    
+    // Show loading state
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+
+    try {
+      const profile_url = document.getElementById('tweetsProfileUrl').value.trim();
+      const scroll_count = parseInt(document.getElementById('tweetsScrolls').value,10) || 5;
+
+      // Front-end guard: URL validation
+      if(!isValidTwitterUrl(profile_url)){
+        alert('Invalid Twitter/X URL: ' + profile_url);
+        return;
+      }
+      // Show processing modal immediately
+      showProcessing('Starting Tweets scraping…', 'Task started. Watch Live Logs for progress.');
+
+      const res = await fetch('/api/scrape-tweets', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({profile_url, scroll_count})});
+      const data = await res.json();
+      if(data.ok){
+        // Close the Tweets config modal to focus on processing
+        const startEl = document.getElementById('modalTweets');
+        if (startEl) {
+          const startInst = bootstrap.Modal.getOrCreateInstance(startEl);
+          startInst.hide();
+        }
+      } else {
+        // Hide processing and show error
+        const procEl = document.getElementById('modalProcessing');
+        if (procEl) {
+          const procInst = bootstrap.Modal.getOrCreateInstance(procEl);
+          procInst.hide();
+        }
+        alert(data.message || 'Failed to start');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred: ' + error.message);
+      // Hide processing on error
+      const procEl = document.getElementById('modalProcessing');
+      if (procEl) {
+        const procInst = bootstrap.Modal.getOrCreateInstance(procEl);
+        procInst.hide();
+      }
+    } finally {
+      // Reset button state
+      btn.disabled = false;
+      spinner.classList.add('d-none');
+    }
+  });
+
+  // Helper: simple keyword validation (2-100 chars)
+  function isValidRedditKeyword(k){
+    if (!k) return false;
+    const len = k.trim().length;
+    return len >= 2 && len <= 100;
+  }
+
+  function isValidInstagramProfileUrlStrict(u){
+    try {
+      const url = new URL(u.startsWith('http') ? u : 'https://'+u);
+      const host = (url.hostname || '').toLowerCase();
+      const validHost = host === 'instagram.com' || host === 'www.instagram.com' || host === 'm.instagram.com' || host.endsWith('.instagram.com');
+      if (!validHost) return false;
+      const segs = (url.pathname || '/').split('/').filter(Boolean);
+      if (segs.length !== 1) return false;
+      const banned = new Set(['settings','help','accounts','explore','p','reels','stories']);
+      if (banned.has(segs[0].toLowerCase())) return false;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // Start Reddit comments scraping
+  document.getElementById('startRedditScrape').addEventListener('click', async ()=>{
+    const btn = document.getElementById('startRedditScrape');
+    const spinner = btn.querySelector('.spinner-border');
+
+    // Show loading state
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+
+    try {
+      const keyword = document.getElementById('redditKeyword').value.trim();
+      const num_posts = parseInt(document.getElementById('redditNumPosts').value,10) || 10;
+
+      // Front-end guard: keyword and range
+      if(!isValidRedditKeyword(keyword)){
+        alert('Please enter a keyword between 2 and 100 characters.');
+        return;
+      }
+      if(isNaN(num_posts) || num_posts < 1 || num_posts > 100){
+        alert('Number of Posts must be between 1 and 100.');
+        return;
+      }
+
+      // Show processing modal immediately with required message
+      showProcessing('Scraping process started…', 'Scraping process started...');
+
+      const res = await fetch('/api/scrape-reddit-comments', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ keyword, num_posts })
+      });
+      const data = await res.json();
+      if(data.ok){
+        // Close the Reddit config modal to focus on processing
+        const startEl = document.getElementById('modalRedditComments');
+        if (startEl) {
+          const startInst = bootstrap.Modal.getOrCreateInstance(startEl);
+          startInst.hide();
+        }
+      } else {
+        // Hide processing and show error
+        const procEl = document.getElementById('modalProcessing');
+        if (procEl) {
+          const procInst = bootstrap.Modal.getOrCreateInstance(procEl);
+          procInst.hide();
+        }
+        alert(data.message || 'Failed to start');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred: ' + error.message);
+      // Hide processing on error
+      const procEl = document.getElementById('modalProcessing');
+      if (procEl) {
+        const procInst = bootstrap.Modal.getOrCreateInstance(procEl);
+        procInst.hide();
+      }
+    } finally {
+      // Reset button state
+      btn.disabled = false;
+      spinner.classList.add('d-none');
+    }
+  });
+
+  let currentTaskName = '';
+  document.getElementById('startReels').addEventListener('click', async ()=>{
+    const btn = document.getElementById('startReels');
+    const spinner = btn.querySelector('.spinner-border');
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+    try {
+      const profile_url = document.getElementById('reelsProfileUrl').value.trim();
+      const num_reels = parseInt(document.getElementById('reelsCount').value,10) || 10;
+      const status = await checkEnvFile();
+      if(!status.ok){
+        alert(status.message || 'Please add a .env file with INSTAGRAM_USERNAME & INSTAGRAM_PASSWORD.');
+        return;
+      }
+      if(!isValidInstagramProfileUrlStrict(profile_url)){
+        alert('Invalid Instagram profile URL: ' + profile_url);
+        return;
+      }
+      if(isNaN(num_reels) || num_reels < 1){
+        alert('Number of Reels must be 1 or greater.');
+        return;
+      }
+      currentTaskName = 'Scrape Instagram Reels';
+      const etaSeconds = Math.max(10, Math.round(10 + num_reels * 5));
+      const procEl = document.getElementById('modalProcessing');
+      if (procEl) {
+        procEl.querySelector('#processingTitle').textContent = 'Starting Reels scraping…';
+        procEl.querySelector('#processingMessage').textContent = 'Task started. Watch Live Logs for progress.';
+        const inst = bootstrap.Modal.getOrCreateInstance(procEl);
+        inst.show();
+      }
+      let elapsed = 0;
+      const progressEl = document.getElementById('processingProgress');
+      const etaEl = document.getElementById('processingEta');
+      const timer = setInterval(()=>{
+        elapsed += 1;
+        const pct = Math.min(99, Math.round((elapsed/etaSeconds)*100));
+        if(progressEl){
+          progressEl.style.width = pct+'%';
+          progressEl.setAttribute('aria-valuenow', String(pct));
+        }
+        if(etaEl){
+          const remain = Math.max(0, etaSeconds - elapsed);
+          etaEl.textContent = 'Estimated time remaining: ' + remain + 's';
+        }
+      }, 1000);
+      const res = await fetch('/api/scrape-instagram-reels', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({profile_url, num_reels})});
+      const data = await res.json();
+      if(!data.ok){
+        clearInterval(timer);
+        const p = document.getElementById('modalProcessing');
+        if (p) {
+          const inst = bootstrap.Modal.getOrCreateInstance(p);
+          inst.hide();
+        }
+        alert(data.message || 'Failed to start');
+      } else {
+        const startEl = document.getElementById('modalReels');
+        if (startEl) {
+          const startInst = bootstrap.Modal.getOrCreateInstance(startEl);
+          startInst.hide();
+        }
+        window.__procTimer = timer;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      const p = document.getElementById('modalProcessing');
+      if (p) {
+        const inst = bootstrap.Modal.getOrCreateInstance(p);
+        inst.hide();
+      }
+      alert('An error occurred: ' + error.message);
+    } finally {
+      btn.disabled = false;
+      spinner.classList.add('d-none');
+    }
+  });
+
+  document.getElementById('btnCancelProcessing').addEventListener('click', async ()=>{
+    if(currentTaskName === 'Scrape Instagram Reels'){
+      try { await fetch('/api/cancel-reels', {method: 'POST'}); } catch {}
+      const p = document.getElementById('modalProcessing');
+      if (p) { const inst = bootstrap.Modal.getOrCreateInstance(p); inst.hide(); }
+    }
+  });
+
+  // Helper: show processing modal with custom title/message
+  function showProcessing(title, message){
+    const el = document.getElementById('modalProcessing');
+    if(!el) return;
+    el.querySelector('#processingTitle').textContent = title || 'Starting…';
+    el.querySelector('#processingMessage').textContent = message || 'Beginning task. Watch Live Logs for progress.';
+    const inst = bootstrap.Modal.getOrCreateInstance(el);
+    inst.show();
+  }
+
+  // removed legacy Reports & AI Analysis handlers
+</script>
+<script>
+  Array.prototype.slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]')).forEach(function(el){
+    try { new bootstrap.Tooltip(el); } catch(e) {}
+  });
+  if (typeof socket !== 'undefined') {
+  socket.on('task_failed', ({ task_name, error }) => {
+    if (task_name === 'Scrape Instagram Reels'){
+      if (window.__procTimer) { try{ clearInterval(window.__procTimer); }catch{} }
+      const p = document.getElementById('modalProcessing');
+      if (p) { const inst = bootstrap.Modal.getOrCreateInstance(p); inst.hide(); }
+      alert((error||'Task failed') + '\nRetry is available.');
+    }
+  });
+  }
+</script>
+<footer class="bg-dark text-white text-center py-2 mt-4">
+  <small>Instagram Data Scraper v1.0 - 2025</small>
+</footer>
+</body>
+</html>

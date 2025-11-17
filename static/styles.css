@@ -1,0 +1,123 @@
+:root {
+  --bg: #f7f9fb;
+  --text: #1f2937;
+  --card-bg: #ffffff;
+  --terminal-bg: #ffffff;
+  --overlay-grad-start: rgba(255,255,255,0.6);
+  --overlay-grad-end: rgba(247,249,251,0.9);
+  --type-color: #111111;
+  --cursor-color: #111111;
+}
+
+html[data-bs-theme="dark"] {
+  --bg: #0d1117;
+  --text: #e6edf3;
+  --card-bg: #161b22;
+  --terminal-bg: #0b1220;
+  --overlay-grad-start: rgba(0,0,0,0.6);
+  --overlay-grad-end: rgba(0,0,0,0.7);
+  --type-color: #e6edf3;
+  --cursor-color: #e6edf3;
+}
+
+/* Base colors */
+body{background:var(--bg);color:var(--text)}
+.navbar-brand{letter-spacing:0.2px}
+.feature-card{background:var(--card-bg);transition:transform .15s ease, box-shadow .15s ease}
+.feature-card:hover{transform:translateY(-2px);box-shadow:0 .5rem 1rem rgba(0,0,0,.08)}
+.icon-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px}
+.terminal{background:var(--terminal-bg)}
+
+/* Background video overlay */
+.bg-video-wrapper{position:fixed;inset:0;z-index:-2;overflow:hidden}
+.bg-video{min-width:100%;min-height:100%;width:auto;height:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);filter:brightness(0.55) saturate(1.1)}
+.bg-overlay{position:absolute;inset:0;background:linear-gradient(180deg,var(--overlay-grad-start),var(--overlay-grad-end))}
+
+html[data-bs-theme="dark"] .bg-video{filter:brightness(0.35) saturate(1.0)}
+
+/* Typewriter styles */
+.typewriter{position:relative;margin:0;color:var(--type-color)}
+.typewriter .cursor{display:inline-block;width:2px;height:1.2em;background:var(--cursor-color);margin-left:6px;animation:blink 1s steps(1,end) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+/* Success modal styles */
+.success-modal .modal-content {
+  background: linear-gradient(180deg, #ffffff 0%, #f6fff8 100%);
+  border: 1px solid rgba(25, 135, 84, 0.15);
+  box-shadow: 0 20px 40px rgba(25, 135, 84, 0.25);
+}
+
+html[data-bs-theme="dark"] .success-modal .modal-content {
+  background: linear-gradient(180deg, #0b1620 0%, #0f1b2a 100%);
+  border: 1px solid rgba(25, 135, 84, 0.25);
+  box-shadow: 0 20px 40px rgba(25, 135, 84, 0.35);
+}
+
+.success-modal .modal-body {
+  background-image: radial-gradient(at 50% -20%, rgba(25, 135, 84, 0.08), transparent 70%);
+}
+
+.success-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  color: #1f8f4d;
+  text-shadow: 0 10px 20px rgba(25, 135, 84, 0.25);
+  position: relative;
+  display: inline-block;
+  animation: popIn 0.35s ease-out;
+}
+
+html[data-bs-theme="dark"] .success-icon {
+  color: #28c76f;
+}
+
+.success-icon::after {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: radial-gradient(rgba(25, 135, 84, 0.25), transparent 60%);
+  animation: pulse 1.6s ease-out infinite;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.8); opacity: .6; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* Subtle icon hover effect on the confirm button */
+.btn-success .bi-check2-circle {
+  transform-origin: center;
+  transition: transform .2s ease;
+}
+
+.btn-success:hover .bi-check2-circle {
+  transform: scale(1.1);
+}
+
+/* Dark mode adjustments for Bootstrap components used with hardcoded light classes */
+html[data-bs-theme="dark"] .navbar {
+  --bs-navbar-color: rgba(255,255,255,.75);
+  --bs-navbar-hover-color: #fff;
+  --bs-navbar-brand-color: #fff;
+  --bs-navbar-brand-hover-color: #fff;
+  background-color: #0d1117 !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+
+html[data-bs-theme="dark"] .bg-white { background-color: #161b22 !important; }
+html[data-bs-theme="dark"] .bg-light { background-color: #0b1620 !important; }
+html[data-bs-theme="dark"] .border, html[data-bs-theme="dark"] .border-bottom { border-color: rgba(255,255,255,0.12) !important; }
+
+/* FAQ adjustments (index inline styles use light colors) */
+html[data-bs-theme="dark"] .faq-question { background-color: rgba(22,27,34,0.85) !important; color: var(--text) !important; }
+html[data-bs-theme="dark"] .faq-answer { background-color: var(--card-bg) !important; }
+
+/* Cards hover shadow slightly stronger in light, subtle in dark */
+.feature-card:hover{transform:translateY(-2px);box-shadow:0 .5rem 1rem rgba(0,0,0,.08)}
+html[data-bs-theme="dark"] .feature-card:hover{box-shadow:0 .5rem 1rem rgba(0,0,0,.35)}

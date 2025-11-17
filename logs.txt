@@ -1,0 +1,53 @@
+[2025-11-17 01:07:35] Application started.
+[2025-11-17 01:13:53] Scrape Instagram Reels – started
+[2025-11-17 01:13:53] Folder 'graphs' has been removed.
+[2025-11-17 01:13:53] Deleted: instagram_user_reels_data.json
+[2025-11-17 01:13:53] Not found: Instagram_user_reels_data.json
+[2025-11-17 01:13:53] Deleted: Instagram_user_reels_data.xlsx
+[2025-11-17 01:14:59] username: hormozi
+[2025-11-17 01:14:59] account_url: https://www.instagram.com/hormozi/
+[2025-11-17 01:14:59] audio_name: Original audio
+[2025-11-17 01:14:59] audio_url: https://www.instagram.com/reels/audio/556301287094441/?hl=en
+[2025-11-17 01:14:59] likes_count: 73474
+[2025-11-17 01:14:59] reel_caption: hormozi Verified Whatever. Just win. 53w
+[2025-11-17 01:14:59] hashtags: 
+[2025-11-17 01:14:59] system_time: Nov 8, 2024
+[2025-11-17 01:14:59] upload_time: 0
+[2025-11-17 01:14:59] post_url: https://www.instagram.com/reel/DCIgt7vP2qm/?hl=en
+[2025-11-17 01:15:03] username: hormozi
+[2025-11-17 01:15:03] account_url: https://www.instagram.com/hormozi/
+[2025-11-17 01:15:03] audio_name: Dear Ivante
+[2025-11-17 01:15:03] audio_url: https://www.instagram.com/reels/audio/1063157541336114/?hl=en
+[2025-11-17 01:15:03] likes_count: 111059
+[2025-11-17 01:15:03] reel_caption: hormozi Verified Let’s try to get this in front of Ivante (spelling?) If you know him, tag him in the comments. 125w
+[2025-11-17 01:15:03] hashtags: 
+[2025-11-17 01:15:03] system_time: Jun 23, 2023
+[2025-11-17 01:15:03] upload_time: 0
+[2025-11-17 01:15:03] post_url: https://www.instagram.com/reel/Ct2zx94onmh/?hl=en
+[2025-11-17 01:15:06] username: hormozi
+[2025-11-17 01:15:06] account_url: https://www.instagram.com/hormozi/
+[2025-11-17 01:15:06] audio_name: Original audio
+[2025-11-17 01:15:06] audio_url: https://www.instagram.com/reels/audio/831543762057833/?hl=en
+[2025-11-17 01:15:06] likes_count: 34342
+[2025-11-17 01:15:06] reel_caption: hormozi Verified What would you rate my elevator joke? Also, let me know if you'd like to see more mini-vlogs like this on IG. ✊ Edited · 96w
+[2025-11-17 01:15:06] hashtags: 
+[2025-11-17 01:15:06] system_time: Jan 12, 2024
+[2025-11-17 01:15:06] upload_time: 0
+[2025-11-17 01:15:06] post_url: https://www.instagram.com/reel/C2BuPyhNTO_/?hl=en
+[2025-11-17 01:15:10] username: hormozi
+[2025-11-17 01:15:10] account_url: https://www.instagram.com/hormozi/
+[2025-11-17 01:15:10] audio_name: Original audio
+[2025-11-17 01:15:10] audio_url: https://www.instagram.com/reels/audio/792548760449888/?hl=en
+[2025-11-17 01:15:10] likes_count: 2845
+[2025-11-17 01:15:10] reel_caption: hormozi Verified Anyone heard of the “logical and emotional buyer” saying? I don’t agree with it… 7h
+[2025-11-17 01:15:10] hashtags: 
+[2025-11-17 01:15:10] system_time: Nov 16, 2025
+[2025-11-17 01:15:10] upload_time: 7 hours ago
+[2025-11-17 01:15:10] post_url: https://www.instagram.com/reel/DRDzcIMkrAg/?hl=en
+[2025-11-17 01:15:12] d:\Softwares FOR SELL\WEB TOOLS\INSTA DATA SCRAPER WEB\graph_functions.py:19: UserWarning: Starting a Matplotlib GUI outside of the main thread will likely fail.
+[2025-11-17 01:15:12]   plt.figure(figsize=(8,5))
+[2025-11-17 01:15:12] d:\Softwares FOR SELL\WEB TOOLS\INSTA DATA SCRAPER WEB\graph_functions.py:28: UserWarning: Starting a Matplotlib GUI outside of the main thread will likely fail.
+[2025-11-17 01:15:12]   plt.figure(figsize=(8,5))
+[2025-11-17 01:15:13] d:\Softwares FOR SELL\WEB TOOLS\INSTA DATA SCRAPER WEB\graph_functions.py:39: UserWarning: Starting a Matplotlib GUI outside of the main thread will likely fail.
+[2025-11-17 01:15:13]   plt.figure(figsize=(10,6))
+[2025-11-17 01:15:13] Scrape Instagram Reels – failed: Can only use .str accessor with string values!
